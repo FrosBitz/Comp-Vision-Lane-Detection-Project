@@ -3,14 +3,17 @@ import torchvision
 
 
 class ResNetBackbone(torch.nn.Module):
+    BUILDERS = {
+        "18": torchvision.models.resnet18,
+        "34": torchvision.models.resnet34,
+        "50": torchvision.models.resnet50,
+    }
+
     def __init__(self, layers):
         super().__init__()
-        builders = {
-            "18": torchvision.models.resnet18,
-            "34": torchvision.models.resnet34,
-            "50": torchvision.models.resnet50,
-        }
-        model = builders[layers](weights=None)
+        if layers not in self.BUILDERS:
+            raise NotImplementedError(f"Unsupported backbone: {layers}. Choose from {sorted(self.BUILDERS)}.")
+        model = self.BUILDERS[layers](weights=None)
         self.conv1 = model.conv1
         self.bn1 = model.bn1
         self.relu = model.relu
@@ -104,4 +107,8 @@ def load_checkpoint(net, weight_path, device):
     checkpoint = torch.load(weight_path, map_location=device, weights_only=False)
     state = checkpoint["model"] if isinstance(checkpoint, dict) and "model" in checkpoint else checkpoint
     cleaned = {k[7:] if k.startswith("module.") else k: v for k, v in state.items()}
-    net.load_state_dict(cleaned, strict=False)
+    missing, unexpected = net.load_state_dict(cleaned, strict=False)
+    # Missing keys = weights we need but checkpoint lacks → raise. Unexpected keys (e.g. seg_head from
+    # the training-time aux branch) are fine — we don't use them at inference.
+    if missing:
+        raise RuntimeError(f"Checkpoint missing required weights: {missing}")

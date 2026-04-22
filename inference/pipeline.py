@@ -54,7 +54,7 @@ class LaneDetector:
     def annotate(self, bgr_image, draw_style="all", lane_color="green", width=4):
         coords = self.predict(bgr_image)
         draw_lanes(bgr_image, coords, draw_style=draw_style, lane_color=lane_color, width=width)
-        return bgr_image
+        return bgr_image, coords
 
 
 def run_folder(detector, input_dir, output_dir, draw_style, lane_color, width):
@@ -98,7 +98,7 @@ def main():
     parser.add_argument("--weight", default="weight/curvelanes_res34.pth")
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda", "mps"])
     parser.add_argument("--draw-style", default="all", choices=["all", "ego"])
-    parser.add_argument("--lane-color", default="green", choices=list(["green", "blue", "red", "yellow", "white"]))
+    parser.add_argument("--lane-color", default="green", choices=["green", "blue", "red", "yellow", "white"])
     parser.add_argument("--width", type=int, default=4)
     args = parser.parse_args()
 

@@ -42,9 +42,8 @@ if uploaded_file is not None:
         st.image(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), use_container_width=True)
 
     with st.spinner("Running lane detection..."):
-        annotated = detector.annotate(image.copy(), draw_style=draw_style,
-                                      lane_color=lane_color, width=line_width)
-        coords = detector.predict(image)
+        annotated, coords = detector.annotate(image.copy(), draw_style=draw_style,
+                                              lane_color=lane_color, width=line_width)
 
     with col2:
         st.subheader("Lane Detection Output")

@@ -11,6 +11,8 @@ LANE_COLORS = {
     "white": (255, 255, 255),
 }
 
+MIN_LANE_POINT_FRACTION = 1 / 6  # drop lanes with fewer valid anchors than this fraction of the grid
+
 
 def pred2coords(pred, row_anchor, col_anchor, image_width, image_height, local_width=1):
     num_grid_row, num_cls_row, num_lane_row = pred["loc_row"].shape[1:]
@@ -23,8 +25,8 @@ def pred2coords(pred, row_anchor, col_anchor, image_width, image_height, local_w
     loc_row = pred["loc_row"].cpu()
     loc_col = pred["loc_col"].cpu()
 
-    row_min_length = num_cls_row / 6
-    col_min_length = num_cls_col / 6
+    row_min_length = num_cls_row * MIN_LANE_POINT_FRACTION
+    col_min_length = num_cls_col * MIN_LANE_POINT_FRACTION
     lanes_by_idx = {}
 
     for i in range(num_lane_row):
@@ -124,9 +126,12 @@ def select_ego_lanes(coords, image_width, image_height):
         selected.append(min(right, key=lambda s: s[0])[2])
 
     if len(selected) < 2:
+        chosen_ids = {id(lane) for lane in selected}
         for _, _, lane in sorted(scored, key=lambda s: s[0]):
-            if lane not in selected:
-                selected.append(lane)
+            if id(lane) in chosen_ids:
+                continue
+            selected.append(lane)
+            chosen_ids.add(id(lane))
             if len(selected) == 2:
                 break
     return selected
