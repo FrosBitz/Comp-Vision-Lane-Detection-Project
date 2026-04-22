@@ -1,0 +1,16 @@
+**/__pycache__
+.venv/
+output/
+output_*/
+test_images_rotated*/
+*.pyc
+*.pth
+*vscode
+**/build
+evaluate 
+*.pt
+*.png
+**/build
+**/dist
+**/*egg-info
+*.lprof

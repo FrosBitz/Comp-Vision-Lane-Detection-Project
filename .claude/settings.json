@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf output)",
+      "Bash(.venv/bin/python -m inference.pipeline test_images output --draw-style all --lane-color blue)",
+      "Bash(.venv/bin/python -c \"import streamlit; print\\(streamlit.__version__\\)\")"
+    ]
+  }
+}
